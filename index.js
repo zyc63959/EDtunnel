@@ -92,16 +92,6 @@ export default {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
 						});
-					case `/nobtoa/${userID_Path}`:
-						return new Response(GenSub(userID, host), {
-							status: 200,
-							headers: { "Content-Type": "text/plain;charset=utf-8" },
-						});	
-					case `/surfboard/${userID_Path}`:
-						return new Response(getSurfboard(userID, host), {
-							status: 200,
-							headers: { "Content-Type": "text/plain;charset=utf-8" },
-						});		
 					case `/bestip/${userID_Path}`:
 						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${userID}&path=/`, { headers: request.headers });
 					default:
@@ -1302,23 +1292,25 @@ function GenSub(userID_path, hostname) {
 	const result = userIDArray.flatMap((userID) => {
 		const PartHttp = Array.from(HttpPort).flatMap((port) => {
 			if (!hostname.includes('pages.dev')) {
-				const urlPart = `${hostname}-HTTP-${port}`;
+				const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTP-${port}`;
 				const mainProtocolHttp = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttp + urlPart;
-				return proxyIPs.flatMap((proxyIP) => {
-					const secondaryProtocolHttp = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttp + urlPart + '-' + proxyIP + '-' + atob(ed);
-					return [mainProtocolHttp, secondaryProtocolHttp];
-				});
+				return [mainProtocolHttp,...GenSub(proxyIPs.flatMap((proxyIP) => {
+					const secondaryProtocolHttp = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttp + urlPart + '-' + proxyIP;
+					//return [mainProtocolHttp, secondaryProtocolHttp];
+					return secondaryProtocolHttp;
+				}))];
 			}
 			return [];
 		});
 
 		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-			const urlPart = `${hostname}-HTTPS-${port}`;
+			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
 			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
-			return proxyIPs.flatMap((proxyIP) => {
-				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP + '-' + atob(ed);
-				return [mainProtocolHttps, secondaryProtocolHttps];
-			});
+			return [mainProtocolHttps,...(proxyIPs.flatMap((proxyIP) => {
+				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
+				//return [mainProtocolHttps, secondaryProtocolHttps];
+				return secondaryProtocolHttps;
+			}))];
 		});
 
 		return [...PartHttp, ...PartHttps];
