@@ -1292,7 +1292,7 @@ function GenSub(userID_path, hostname) {
 	const result = userIDArray.flatMap((userID) => {
 		const PartHttp = Array.from(HttpPort).flatMap((port) => {
 			if (!hostname.includes('pages.dev')) {
-				const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTP-${port}`;
+				const urlPart = `${hostname}-HTTP-${port}`;
 				const mainProtocolHttp = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttp + urlPart;
 				return [mainProtocolHttp,...GenSub(proxyIPs.flatMap((proxyIP) => {
 					const secondaryProtocolHttp = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttp + urlPart + '-' + proxyIP;
@@ -1304,7 +1304,7 @@ function GenSub(userID_path, hostname) {
 		});
 
 		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
+			const urlPart = `${hostname}-HTTPS-${port}`;
 			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
 			return proxyIPs.flatMap((proxyIP) => {
 				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
@@ -1327,7 +1327,7 @@ function getSurfboard(userID_path, hostname) {
 	const result = userIDArray.flatMap((userID) => {
 		const PartHttp = Array.from(HttpPort).flatMap((port) => {
 			if (!hostname.includes('pages.dev')) {
-				const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTP-${port}`;
+				const urlPart = `${hostname}-HTTP-${port}`;
 				const mainProtocolHttp = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttp + urlPart;
 				return [mainProtocolHttp,...GenSub(proxyIPs.flatMap((proxyIP) => {
 					const secondaryProtocolHttp = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttp + urlPart + '-' + proxyIP;
@@ -1339,7 +1339,7 @@ function getSurfboard(userID_path, hostname) {
 		});
 
 		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
+			const urlPart = `${hostname}-HTTPS-${port}`;
 			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
 			return [mainProtocolHttps,...(proxyIPs.flatMap((proxyIP) => {
 				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
