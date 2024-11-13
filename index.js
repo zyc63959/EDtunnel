@@ -92,6 +92,11 @@ export default {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
 						});
+					case `/test/${userID_Path}`:
+						return new Response(GenSub(userID, host), {
+							status: 200,
+							headers: { "Content-Type": "text/plain;charset=utf-8" },
+						});						
 					case `/bestip/${userID_Path}`:
 						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${userID}&path=/`, { headers: request.headers });
 					default:
