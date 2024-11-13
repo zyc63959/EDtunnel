@@ -92,11 +92,6 @@ export default {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
 						});
-					case `/nobtoa/${userID_Path}`:
-						return new Response(GenSub(userID, host), {
-							status: 200,
-							headers: { "Content-Type": "text/plain;charset=utf-8" },
-						});
 					case `/bestip/${userID_Path}`:
 						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${userID}&path=/`, { headers: request.headers });
 					default:
@@ -1309,17 +1304,13 @@ function GenSub(userID_path, hostname) {
 		});
 
 		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-			const urlPart = `${hostname.split(".").slice(0, 2).join(".")}-HTTPS-${port}`;
+			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
 			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
-			const uniqueMainProtocolHttps = new Set([mainProtocolHttps]);
-		
 			return proxyIPs.flatMap((proxyIP) => {
 				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
-				uniqueMainProtocolHttps.add(secondaryProtocolHttps);
-				return Array.from(uniqueMainProtocolHttps);
+				return [mainProtocolHttps, secondaryProtocolHttps];
 			});
 		});
-		
 
 		return [...PartHttp, ...PartHttps];
 	});
