@@ -97,6 +97,11 @@ export default {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
 						});	
+					case `/surfboard/${userID_Path}`:
+						return new Response(getSurfboard(userID, host), {
+							status: 200,
+							headers: { "Content-Type": "text/plain;charset=utf-8" },
+						});		
 					case `/bestip/${userID_Path}`:
 						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${userID}&path=/`, { headers: request.headers });
 					default:
@@ -533,12 +538,13 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
 				log('webSocketServer has error');
 				controller.error(err);
 			});
-			const { earlyData, error } = base64ToArrayBuffer(earlyDataHeader);
-			if (error) {
-				controller.error(error);
-			} else if (earlyData) {
-				controller.enqueue(earlyData);
-			}
+			//const { earlyData, error } = base64ToArrayBuffer(earlyDataHeader);
+			//if (error) {
+			//	controller.error(error);
+			//} else if (earlyData) {
+			//	controller.enqueue(earlyData);
+			//}
+			controller.enqueue(earlyDataHeader);
 		},
 
 		pull(_controller) {
@@ -1320,3 +1326,40 @@ function GenSub(userID_path, hostname) {
 
 	return result.join('\n');
 }
+
+function getSurfboard(userID_path, hostname) {
+	const userIDArray = userID_path.includes(',') ? userID_path.split(',') : [userID_path];
+	const randomPath = () => '/' + Math.random().toString(36).substring(2, 15) + '?ed=2048';
+	const commonUrlPartHttp = `?encryption=none&security=none&fp=random&type=ws&host=${hostname}&path=${encodeURIComponent(randomPath())}#`;
+	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
+
+	const result = userIDArray.flatMap((userID) => {
+		const PartHttp = Array.from(HttpPort).flatMap((port) => {
+			if (!hostname.includes('pages.dev')) {
+				const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTP-${port}`;
+				const mainProtocolHttp = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttp + urlPart;
+				return [mainProtocolHttp,...GenSub(proxyIPs.flatMap((proxyIP) => {
+					const secondaryProtocolHttp = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttp + urlPart + '-' + proxyIP;
+					//return [mainProtocolHttp, secondaryProtocolHttp];
+					return secondaryProtocolHttp;
+				}))];
+			}
+			return [];
+		});
+
+		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
+			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
+			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
+			return [mainProtocolHttps,...(proxyIPs.flatMap((proxyIP) => {
+				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
+				//return [mainProtocolHttps, secondaryProtocolHttps];
+				return secondaryProtocolHttps;
+			}))];
+		});
+
+		return [...PartHttp, ...PartHttps];
+	});
+
+	return result.join('\n');
+}
+
