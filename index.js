@@ -1304,14 +1304,17 @@ function GenSub(userID_path, hostname) {
 		});
 
 		const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-			const urlPart = `${hostname.split(".").slice(0,2).join(".")}-HTTPS-${port}`;
+			const urlPart = `${hostname.split(".").slice(0, 2).join(".")}-HTTPS-${port}`;
 			const mainProtocolHttps = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPartHttps + urlPart;
-			return [mainProtocolHttps,...(proxyIPs.flatMap((proxyIP) => {
+			const uniqueMainProtocolHttps = new Set([mainProtocolHttps]);
+		
+			return proxyIPs.flatMap((proxyIP) => {
 				const secondaryProtocolHttps = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPartHttps + urlPart + '-' + proxyIP;
-				//return [mainProtocolHttps, secondaryProtocolHttps];
-				return secondaryProtocolHttps;
-			}))];
+				uniqueMainProtocolHttps.add(secondaryProtocolHttps);
+				return Array.from(uniqueMainProtocolHttps);
+			});
 		});
+		
 
 		return [...PartHttp, ...PartHttps];
 	});
