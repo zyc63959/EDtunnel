@@ -1337,7 +1337,7 @@ function getSurfboard(userID_path, hostname) {
     const commonUrlPartHttp = `?encryption=none&security=none&fp=random&type=ws&host=${hostname}&path=${encodeURIComponent(randomPath())}#`;
     const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
 
-    const generateUrls = (protocol, port, commonUrlPart, urlPart) => {
+    const generateUrls = (protocol, port, commonUrlPart, urlPart, userID) => {
         const mainUrl = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPart + urlPart;
         const uniqueUrls = new Set([mainUrl]);
 
@@ -1353,19 +1353,18 @@ function getSurfboard(userID_path, hostname) {
         const PartHttp = Array.from(HttpPort).flatMap((port) => {
             if (!hostname.includes('pages.dev')) {
                 const urlPart = `${hostname}-HTTP-${port}`;
-                return generateUrls('http', port, commonUrlPartHttp, urlPart);
+                return generateUrls('http', port, commonUrlPartHttp, urlPart, userID);
             }
             return [];
         });
 
         const PartHttps = Array.from(HttpsPort).flatMap((port) => {
             const urlPart = `${hostname.split(".").slice(0, 2).join(".")}-HTTPS-${port}`;
-            return generateUrls('https', port, commonUrlPartHttps, urlPart);
+            return generateUrls('https', port, commonUrlPartHttps, urlPart, userID);
         });
 
-        return new Set([...PartHttp, ...PartHttps]);
+        return [...PartHttp, ...PartHttps];
     });
 
-    return Array.from(result).join('\n');
+    return result.join('\n');
 }
-
