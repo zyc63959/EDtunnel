@@ -92,7 +92,7 @@ export default {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
 						});
-					case `/test/${userID_Path}`:
+					case `/nobtoa/${userID_Path}`:
 						return new Response(GenSub(userID, host), {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
