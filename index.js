@@ -106,7 +106,7 @@ export default {
 						return new Response(getSurfboard(userID, host), {
 							status: 200,
 							headers: { "Content-Type": "text/plain;charset=utf-8" },
-						});						
+						});			
 					case `/bestip/${userID_Path}`:
 						return fetch(`https://sub.xf.free.hr/auto?host=${host}&uuid=${userID}&path=/`, { headers: request.headers });
 					default:
