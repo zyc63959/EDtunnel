@@ -1330,41 +1330,37 @@ function GenSub(userID_path, hostname) {
 
 	return result.join('\n');
 }
-
 function getSurfboard(userID_path, hostname) {
-    const userIDArray = userID_path.includes(',') ? userID_path.split(',') : [userID_path];
-    const randomPath = () => '/' + Math.random().toString(36).substring(2, 15) + '?ed=2048';
-    const commonUrlPartHttp = `?encryption=none&security=none&fp=random&type=ws&host=${hostname}&path=${encodeURIComponent(randomPath())}#`;
-    const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
+	const userIDArray = userID_path.includes(',') ? userID_path.split(',') : [userID_path];
+	const randomPath = encodeURIComponent('/' + Math.random().toString(36).substring(2, 15) + '?ed=2048');
+	const generateUrl = (userID, protocol, port, commonPart, urlPart) =>
+		`${atob(pt)}://${userID}${atob(at)}${hostname}:${port}${commonPart}${urlPart}`;
+	const generateProxyUrl = (userID, protocol, port, commonPart, urlPart, proxyIP) =>
+		`${atob(pt)}://${userID}${atob(at)}${proxyIP.split(':')[0]}:${proxyPort}${commonPart}${urlPart}-${proxyIP}-${atob(ed)}`;
 
-    const generateUrls = (protocol, port, commonUrlPart, urlPart, userID) => {
-        const mainUrl = atob(pt) + '://' + userID + atob(at) + hostname + ':' + port + commonUrlPart + urlPart;
-        const uniqueUrls = new Set([mainUrl]);
+	const commonUrlPartHttp = `?encryption=none&security=none&fp=random&type=ws&host=${hostname}&path=${randomPath}#`;
+	const commonUrlPartHttps = `?encryption=none&security=tls&sni=${hostname}&fp=random&type=ws&host=${hostname}&path=%2F%3Fed%3D2048#`;
 
-        proxyIPs.forEach((proxyIP) => {
-            const secondaryUrl = atob(pt) + '://' + userID + atob(at) + proxyIP.split(':')[0] + ':' + proxyPort + commonUrlPart + urlPart + '-' + proxyIP;
-            uniqueUrls.add(secondaryUrl);
-        });
+	const result = userIDArray.flatMap(userID => {
+		const httpUrls = !hostname.includes('pages.dev') ? 
+			Array.from(HttpPort).flatMap(port => {
+				const urlPart = `${hostname}-HTTP-${port}`;
+				return [
+					generateUrl(userID, 'http', port, commonUrlPartHttp, urlPart),
+					...proxyIPs.map(proxyIP => generateProxyUrl(userID, 'http', port, commonUrlPartHttp, urlPart, proxyIP))
+				];
+			}) : [];
 
-        return Array.from(uniqueUrls);
-    };
+		const httpsUrls = Array.from(HttpsPort).flatMap(port => {
+			const urlPart = `${hostname}-HTTPS-${port}`;
+			return [
+				generateUrl(userID, 'https', port, commonUrlPartHttps, urlPart),
+				...proxyIPs.map(proxyIP => generateProxyUrl(userID, 'https', port, commonUrlPartHttps, urlPart, proxyIP))
+			];
+		});
 
-    const result = userIDArray.flatMap((userID) => {
-        const PartHttp = Array.from(HttpPort).flatMap((port) => {
-            if (!hostname.includes('pages.dev')) {
-                const urlPart = `${hostname}-HTTP-${port}`;
-                return generateUrls('http', port, commonUrlPartHttp, urlPart, userID);
-            }
-            return [];
-        });
+		return [...httpUrls, ...httpsUrls];
+	});
 
-        const PartHttps = Array.from(HttpsPort).flatMap((port) => {
-            const urlPart = `${hostname.split(".").slice(0, 2).join(".")}-HTTPS-${port}`;
-            return generateUrls('https', port, commonUrlPartHttps, urlPart, userID);
-        });
-
-        return [...PartHttp, ...PartHttps];
-    });
-
-    return result.join('\n');
+	return result.join('\n');
 }
