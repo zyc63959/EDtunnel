@@ -1363,7 +1363,7 @@ function getSurfboard(userID_path, hostname) {
 		});
 		
 
-		return [...PartHttp, ...PartHttps];
+		return new Set([...PartHttp, ...PartHttps]);
 	});
 
 	return result.join('\n');
